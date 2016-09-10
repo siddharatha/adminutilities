@@ -22,6 +22,10 @@
         <enabled>true</enabled>
     </pageAccesses>
     <pageAccesses>
+        <apexPage>VFP_Sid_Admin_ListViewAnalyzerMultiple</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
         <apexPage>VFP_Sid_Admin_RegisterEnvironments</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
