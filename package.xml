@@ -10,6 +10,10 @@
         <name>ApexPage</name>
     </types>
     <types>
+        <members>Admin</members>
+        <name>Profile</name>
+    </types>
+    <types>
         <members>CCCClientLibraries</members>
         <members>JSforce</members>
         <name>StaticResource</name>

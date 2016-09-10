@@ -1,0 +1,285 @@
+<!--
+Author:Sid
+-->
+<apex:page docType="html-5.0" title="Sid's admin utilities wizard" sidebar="false" showheader="false">
+    <apex:composition template="VFP_AngularBootstrapTemplate">
+        <apex:define name="scriptstoinclude">
+            <!-- once development is done move code to a .js file and load it from static resources --> 
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ng-csv/0.3.3/ng-csv.min.js" />             
+        </apex:define>
+        <apex:define name="stylesheetstoinclude">
+            <!-- once development is done move code to a .css file and load it from static resources -->            
+            <style>                
+              .table{
+              	cursor: pointer; 
+              }  
+            </style>
+        </apex:define>        
+        <apex:define name="content">
+            <div ng-app="Admin" class="container" ng-controller="AdminController">            	
+            	<div>
+            				<a href="/apex/VFP_Sid_AdminUtilities">Back to Admin Utilities</a>
+	                        <button class="btn btn-warning" ng-disabled="step==1" ng-click="prev()">Prev</button>
+	            			<button ng-init="isreadyfornext=false" class="btn btn-primary" ng-disabled="step==3 || !isreadyfornext" ng-click="next()">Next</button>	            			
+	            			<span class="text-danger text-center" ng-show="message!=null && message!=''" ng-bind="message"></span>            	
+    			</div>
+            	<div class="panel" ng-switch="step" ng-init="step=1">            	
+            		<div ng-switch-when="1" class="panel panel-primary">
+	            		<div class="panel-heading">
+	                        <h3 class="panel-title" id="panel-title">Select Object ({{sobjects.length}})<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>	                        
+	            			</h3>
+	                    </div>
+	                    <div class="panel-body">
+	            			<input type="text" size="40" class="form-control" ng-model="objectFilter" />
+	            			<table id="objecttable" class="table table-condensed">
+	            				<thead>
+	            				<tr>
+	            					<th>Object Label</th>
+	            					<th>Object API Name</th>            					
+	            				</tr>
+	            				</thead>
+	            				<tbody>
+	            				<tr ng-repeat="sobject in sobjects | filter:objectFilter" ng-click="selectObject(sobject,$index)">
+	            					<td ng-bind="sobject.label"></td>
+	            					<td ng-bind="sobject.name"></td>            					
+	            				</tr>
+	            				</tbody>
+	            			</table>
+            			</div>
+            		</div>            	
+            		<div ng-switch-when="2" class="panel panel-primary">
+            			<div class="panel-heading">
+	                        <h3 class="panel-title" id="panel-title">Select list views ({{listviews.length}})<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>
+	                    </div>
+	                    <div class="panel-body">	                    	
+	            			<input type="text" size="40" class="form-control" ng-model="listviewFilter" placeholder="Filter on list views" />
+	            			<table id="listviewtable" class="table table-condensed">
+	            				<thead>
+	            				<tr>
+	            					<th>List View Label</th>
+	            					<th>List View Id</th>			            			
+	            				</tr>
+	            				</thead>
+	            				<tbody>
+	            				<tr ng-repeat="listview in listviews | filter:listviewFilter" ng-click="selectListViews(listview,$index)">
+	            					<td ng-bind="listview.label"></td>
+	            					<td ng-bind="listview.id"></td>	            					
+	            				</tr>
+	            				</tbody>
+	            			</table>	            			
+            			</div>
+            		</div>
+            		<div ng-switch-when="3" class="panel panel-primary">
+            			<button class="btn btn-danger" ng-click="calculateAverageRunTime()">Calculate Average Run Time</button>
+            			<button class="btn btn-success" ng-click="runOnce()">Run the list view once</button>
+            			<button class="btn btn-default" ng-if="csvheader!=null" ng-csv="listviewresultrecords" csv-header="csvheader" filename="{{$selectedlistview.developerName}}.csv">Export data in a CSV</button>
+            			<div class="panel-heading">
+	                        <h3 class="panel-title" id="panel-title"><b ng-bind="listviewdescriberesult.sobjectType" />List View Detail - {{$selectedlistview.label}}<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>
+	                    </div>
+	                    <div class="panel-body">	                    	
+	            			 <ul>
+	            			 	<li>Id : {{listviewdescriberesult.id}}</li>		                		
+		                		<li> query : {{listviewdescriberesult.query}}</li>		                		
+		                		<li> <b>Columns:</b>
+		                		<table class="table table-condensed">
+		                			<tr>
+										<th>label</th>
+										<th>fieldNameOrPath</th>
+										<th>selectListItem</th>
+										<th>sortIndex</th>
+										<th>sortable</th>
+		                			</tr>
+		                			<tr ng-repeat="column in listviewdescriberesult.columns">
+										<td ng-bind="column.label" />
+										<td ng-bind="column.fieldNameOrPath" />
+										<td ng-bind="column.selectListItem" />
+										<td ng-bind="column.sortIndex" />
+										<td ng-bind="column.sortable" />
+		                			</tr>
+		                		</table> 
+		                		</li>
+		                		<li> <b>Order By:</b>
+		                		<table class="table table-condensed">
+		                			<tr>
+										<th>fieldNameOrPath</th>
+										<th>nullsPosition</th>
+										<th>sortDirection</th>										
+		                			</tr>
+		                			<tr ng-repeat="orderby in listviewdescriberesult.orderBy">
+										<td ng-bind="orderby.fieldNameOrPath" />
+										<td ng-bind="orderby.nullsPosition" />
+										<td ng-bind="orderby.sortDirection" />										
+		                			</tr>
+		                		</table> 
+		                		</li>
+		                		<li>
+		                			<table class="table table-condensed">
+		                				<tr>
+		                					<th>No of Runs</th>
+		                					<th>No of Records</th>
+		                					<th>Time per run</th>
+		                					<th>Avg run time</th>		                					
+		                				</tr>
+		                				<tr>
+		                					<td ng-bind="timerinfo.length" />
+		                					<td ng-bind="sizeoflistview" />
+		                					<td><ol>
+				                				<li ng-repeat="timer in timerinfo" ng-bind="timer"/>
+				                			</ol></td>
+		                					<td ng-bind="timeravg" />
+		                				</tr>
+		                			</table>		                					                			
+		                		</li>
+	            			 </ul>           			
+            			</div>
+            		</div>         			
+            	</div>            	
+            </div>
+        </apex:define>
+        <apex:define name="customscripts">
+            <!-- it is only meant for development, code should be inside static resources -->
+            <script>
+            var debugscope;
+            var app = angular.module('Admin', ['chieffancypants.loadingBar','ngAnimate','ngRoute','ngSanitize','ui.utils','ui.bootstrap','ngCsv']);
+            app.config(function(cfpLoadingBarProvider) {
+                cfpLoadingBarProvider.includeSpinner = true;
+            });
+            app.controller('AdminController', ['$scope','cfpLoadingBar',function($scope,cfpLoadingBar) {                
+                angular.element(document).ready(function () {
+                    //establishing a connection
+                    debugscope=$scope;
+                    $scope.conn = new jsforce.Connection({ accessToken: '{!$Api.Session_Id}' });
+                    cfpLoadingBar.start();
+                    $scope.message='Getting Object information';
+                    $scope.conn.describeGlobal().then(function(res){
+                        $scope.sobjects=_.reject(res.sobjects,
+                                                 function(item){
+                                                     return (item.name.indexOf('__Share')>-1 || item.name.indexOf('__Tag')>-1 || item.name.indexOf('History')>-1 || item.name.indexOf('feed')>-1 || item.customSetting || !item.queryable)
+                                                 });
+                        $scope.message='';
+                        cfpLoadingBar.complete();
+                    });                                 
+                });
+
+                $scope.next=function(){                	
+                	$scope.step++;
+                	$scope.isreadyfornext=false;
+                	if($scope.step==2)
+                	{
+                		$scope.getViews();
+                	}
+                	if($scope.step==3)
+                	{
+                		$scope.seeViewInfo();
+                	}                		                
+                }                
+
+
+                $scope.getViews=function(){
+                	$scope.message='Getting list view information for '+$scope.$selecteditem.label
+                	cfpLoadingBar.start();
+                	$scope.mainsobject=$scope.conn.sobject($scope.$selecteditem.name);
+                	$scope.mainsobject.listviews().then(function(results){                        
+                        $scope.listviews=_.filter(results.listviews,function(listview){listview.selected=false; return true;});
+                        $scope.message='';
+                        cfpLoadingBar.complete();                        
+                    });
+                }
+
+                $scope.prev=function(){                	
+                	$scope.step--;
+                	if($scope.step==3)
+                	{
+                		$scope.isreadyfornext=true;
+                	}
+                }               
+
+                $scope.selectObject=function(item,itemindex){                	
+                	angular.element(document.querySelectorAll('#objecttable tbody tr')).removeClass('alert alert-info');
+                	angular.element(document.querySelectorAll('#objecttable tbody tr')[itemindex]).addClass('alert alert-info');
+                	$scope.$selecteditem=item;
+                	$scope.isreadyfornext=true;                	
+                }
+
+                $scope.selectListViews=function(item,itemindex){                	
+                	angular.element(document.querySelectorAll('#listviewtable tbody tr')).removeClass('alert alert-info');
+                	angular.element(document.querySelectorAll('#listviewtable tbody tr')[itemindex]).addClass('alert alert-info');
+                	$scope.$selectedlistview=item;
+                	$scope.isreadyfornext=true;                	
+                }
+
+                // $scope.selectListViews=function(item,itemindex){	
+                // if(!item.hasOwnProperty('selected'))                
+                // 	item['selected']=false;
+	               //  	item.selected=!item.selected;                	
+	               //  	groupbyselected=_.groupBy($scope.fields,'selected');
+	               //  	if(groupbyselected.hasOwnProperty('true'))
+	               //  		$scope.isreadyfornext=true;
+	               //  	else
+	               //  		$scope.isreadyfornext=false;	                
+                // }
+                $scope.seeViewInfo=function(){
+                	cfpLoadingBar.start();
+                	$scope.mainsobject.listview($scope.$selectedlistview.id).describe().then(function(result){
+                		$scope.listviewdescriberesult=result;                	
+                		console.log('finished');
+                		console.log($scope.listviewdescriberesult);
+                		cfpLoadingBar.complete();
+                	});
+                }
+
+                $scope.calculateAverageRunTime=function(){
+                	cfpLoadingBar.start();
+                	$scope.runonceactive=false;
+                	$scope.timerinfo=[];
+                	$scope.timeravg=0.0;
+                	$scope.sizeoflistview=0;
+                	for(i=0;i<10;i++)
+                	{
+						runListView();
+                	}                	
+                }
+
+                $scope.runOnce=function(){
+                	cfpLoadingBar.start();
+                	$scope.timerinfo=[];
+                	$scope.timeravg=0.0;
+                	$scope.runonceactive=true;
+                	$scope.sizeoflistview=0;                	
+					runListView();                	
+                }
+
+                function runListView(){
+                	var starttime=_.now();
+	                $scope.mainsobject.listview($scope.$selectedlistview.id).results(function(err,result){
+	                	if(err){$scope.message=err.message;}
+	                	else{	                	
+		                	$scope.sizeoflistview=result.size;
+		                	$scope.timerinfo.push((_.now()-starttime)/1000);
+		                	if($scope.timerinfo.length==10 || $scope.runonceactive)
+		                		calculateaverage();	                		     
+		                	if($scope.timerinfo.length==1){
+		                		finalrecords=[];	                			                			
+		                		_.each(_.pluck(result.records,'columns'),function(item){finalrecords.push(_.object(_.pluck(item,'fieldNameOrPath'),_.pluck(item,'value')))});
+		                		if(finalrecords.length>0)
+		                		{
+			                		$scope.csvheader=_.keys(finalrecords[0])
+			                		$scope.listviewresultrecords=finalrecords;
+		                		}
+		                	}
+	                	}	           	
+	                });
+            	}
+
+            	function calculateaverage(){
+            		_.each($scope.timerinfo,function(timer){$scope.timeravg+=timer;})
+            		$scope.timeravg=$scope.timeravg/10;
+            		cfpLoadingBar.complete();
+            	}
+
+                   
+            }]);     
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

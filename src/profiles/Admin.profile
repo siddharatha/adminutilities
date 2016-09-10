@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Profile xmlns="http://soap.sforce.com/2006/04/metadata">
+    <custom>false</custom>
+    <pageAccesses>
+        <apexPage>VFP_AngularBootstrapTemplate</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>VFP_Sid_AdminUtilities</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>VFP_Sid_Admin_ComponentSelector</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>VFP_Sid_Admin_FieldAdoptionUtility</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>VFP_Sid_Admin_ListViewAnalyzer</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>VFP_Sid_Admin_RegisterEnvironments</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <userLicense>Salesforce</userLicense>
+</Profile>
