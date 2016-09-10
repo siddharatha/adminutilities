@@ -1,0 +1,323 @@
+<!--
+Author:Sid
+-->
+<apex:page docType="html-5.0" title="Sid's admin utilities wizard" sidebar="false" showheader="false">
+    <apex:composition template="VFP_AngularBootstrapTemplate">
+        <apex:define name="scriptstoinclude">
+            <!-- once development is done move code to a .js file and load it from static resources -->              
+        </apex:define>
+        <apex:define name="stylesheetstoinclude">
+            <!-- once development is done move code to a .css file and load it from static resources -->            
+            <style>                
+              .table{
+              	cursor: pointer; 
+              }  
+            </style>
+        </apex:define>        
+        <apex:define name="content">
+            <div ng-app="Admin" class="container" ng-controller="AdminController">            	
+            	<div>
+            				<a href="/apex/VFP_Sid_AdminUtilities">Back to Admin Utilities</a>
+	                        <button class="btn btn-warning" ng-disabled="step==1" ng-click="prev()">Prev</button>
+	            			<button ng-init="isreadyfornext=false" class="btn btn-primary" ng-disabled="step==4 || !isreadyfornext" ng-click="next()">Next</button>
+	            			<button class="btn btn-success" ng-if="groupinfo==null" ng-click="loadListInfo()">Load Modification information</button>
+	            			<span class="text-primary text-center" ng-show="message!=null && message!=''" ng-bind="message"></span>            	
+    			</div>
+            	<div class="panel" ng-switch="step" ng-init="step=1">            	
+            		<div ng-switch-when="1" class="panel panel-primary">
+	            		<div class="panel-heading">
+	                        <h3 class="panel-title" id="panel-title">Select Object<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>	                        
+	            			</h3>
+	                    </div>
+	                    <div class="panel-body">
+	            			<input type="text" size="40" class="form-control" ng-model="objectFilter" />
+	            			<table id="objecttable" class="table table-condensed">
+	            				<thead>
+	            				<tr>
+	            					<th>Object Label</th>
+	            					<th>Object API Name</th>            					
+	            				</tr>
+	            				</thead>
+	            				<tbody>
+	            				<tr ng-repeat="sobject in sobjects | filter:objectFilter" ng-click="selectObject(sobject,$index)">
+	            					<td ng-bind="sobject.label"></td>
+	            					<td ng-bind="sobject.name"></td>            					
+	            				</tr>
+	            				</tbody>
+	            			</table>
+            			</div>
+            		</div>            	
+            		<div ng-switch-when="2" class="panel panel-primary">
+            			<div class="panel-heading">
+	                        <h3 class="panel-title" id="panel-title">Select fields<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>
+	                    </div>
+	                    <div class="panel-body">	                    	
+	            			<input type="text" size="40" class="form-control" ng-model="fieldFilter" placeholder="Filter on Fields" />
+	            			<table id="fieldtable" class="table table-condensed">
+	            				<thead>
+	            				<tr>
+	            					<th>Field Label</th>
+	            					<th>Field API Name</th>
+			            			<th>Field Help Text</th>		
+			            			<th>is Custom Field ?</th>		
+			            			<th ng-if="groupinfo!=null">Last Modified By Date</th>
+			            			<th ng-if="groupinfo!=null">Last Modified By Name</th>
+			            			<th ng-if="groupinfo!=null">Created By Date</th>
+			            			<th ng-if="groupinfo!=null">Created By Name</th>
+	            				</tr>
+	            				</thead>
+	            				<tbody>
+	            				<tr ng-repeat="field in fields | filter:fieldFilter" ng-click="selectField(field,$index)" ng-class="{'alert-info':field.selected}">
+	            					<td ng-bind="field.label"></td>
+	            					<td ng-bind="field.name"></td>
+	            					<td ng-bind="field.inlineHelpText"></td>
+	            					<td ng-bind="field.custom"></td>
+	            					<td ng-if="groupinfo!=null" ng-bind="field.lastModifiedDate"></td>
+	            					<td ng-if="groupinfo!=null" ng-bind="field.lastModifiedByName"></td>
+	            					<td ng-if="groupinfo!=null" ng-bind="field.createdDate"></td>
+	            					<td ng-if="groupinfo!=null" ng-bind="field.createdByName"></td>
+	            				</tr>
+	            				</tbody>
+	            			</table>	            			
+            			</div>
+            		</div>        			
+            		<div ng-switch-when="3" class="panel panel-primary">
+            			<button class="btn btn-success" ng-click="addSplit()">Add Split</button>
+            			<div class="panel-heading">
+	                        <h3 class="panel-title" id="panel-title">Configure Splits<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>	                        
+	                    </div>
+	                    <div class="panel-body">	                        
+	                    	<div ng-repeat="split in splits" class="panel panel-info">
+		                    	<div class="panel-heading">
+		                        	<h3 class="panel-title" id="panel-title">Split {{$index+1}}<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>	                        
+		                    	</div>
+		                    	<div class="panel-body">	                    		                    	
+		                    		<div ng-repeat="condition in split.conditions">
+			                    		<form class="form-inline">	                    			
+		                    				<div class="form-group">                    					
+			                    				<select class="form-control" ng-model="condition.field" ng-options="field.name as field.label for field in fields"></select>
+			                    				<select class="form-control" ng-model="condition.type" ng-options="conditiontype for conditiontype in ['=','!=','>=','<=','in','like']"></select>
+			                    				<input type="text" ng-model="condition.text" class="form-control" />
+					                    		<button class="btn btn-success" ng-click="addCondition(split)">
+					                    			<span class="glyphicon glyphicon-plus"></span>	                    			
+					                    		</button>
+					                    		<button class="btn btn-danger" ng-click="removeCondition(split,$index)">
+					                    			<span class="glyphicon glyphicon-minus"></span>	                    			
+					                    		</button>
+				                    		</div>
+			                    		</form>
+		                    		</div>
+	                    		</div>	                    		
+	                    	</div>
+	                    </div>
+            		</div>
+            		<div ng-switch-when="4" class="panel panel-primary">            			
+            			<div class="panel-heading">
+	                        <h3 class="panel-title" id="panel-title">Results for {{$selecteditem.name}}<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>	                        
+	                    </div>
+	                    <div class="panel-body">	                        
+	                    	<div ng-repeat="split in splits" class="panel panel-info">
+		                    	<div class="panel-heading">
+		                        	<h3 class="panel-title" id="panel-title">Split {{$index+1}}<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>	                        
+		                    	</div>
+		                    	<div class="panel-body">
+		                    		<div class="text-primary" ng-bind="split.query"></div>
+		                    		<table class="table table-condensed">
+		                    			<tr>
+		                    				<th>Field Label</th>
+		                    				<th>API Name</th>
+		                    				<th>Count of Records</th>
+		                    				<th>Percentage of Usage</th>
+		                    			</tr>
+		                    			<tr ng-repeat="field in split.selectedfields">
+		                    				<td ng-bind="field.label" />
+		                    				<td ng-bind="field.name" />
+		                    				<td ng-if="field.counter!=undefined" ng-bind="field.counter" />
+                                        	<td ng-if="field.counter!=undefined" ng-bind="(field.counter/split.totalSize)*100" />
+		                    			</tr>
+		                    		</table>
+	                    		</div>	                    		
+	                    	</div>
+	                    </div>
+            		</div>
+            	</div>            	
+            </div>
+        </apex:define>
+        <apex:define name="customscripts">
+            <!-- it is only meant for development, code should be inside static resources -->
+            <script>
+            var debugscope;
+            var app = angular.module('Admin', ['chieffancypants.loadingBar','ngAnimate','ngRoute','ngSanitize','ui.utils','ui.bootstrap']);
+            app.config(function(cfpLoadingBarProvider) {
+                cfpLoadingBarProvider.includeSpinner = true;
+            });
+            app.controller('AdminController', ['$scope','cfpLoadingBar',function($scope,cfpLoadingBar) {                
+                angular.element(document).ready(function () {
+                    //establishing a connection
+                    debugscope=$scope;
+                    $scope.conn = new jsforce.Connection({ accessToken: '{!$Api.Session_Id}' });
+                    cfpLoadingBar.start();
+                    $scope.message='Getting Object information';
+                    $scope.conn.describeGlobal().then(function(res){
+                        $scope.sobjects=_.reject(res.sobjects,
+                                                 function(item){
+                                                     return (item.name.indexOf('__Share')>-1 || item.name.indexOf('__Tag')>-1 || item.name.indexOf('History')>-1 || item.name.indexOf('feed')>-1 || item.customSetting || !item.queryable)
+                                                 });
+                        $scope.message='';
+                        cfpLoadingBar.complete();
+                    });
+                    $scope.allowedtypes=['date','datetime','double','int','string','id','masterrecord','percent','phone','picklist','reference','textarea','url'];
+                    $scope.splits=[];
+                    $scope.addSplit();                    
+                });
+
+                $scope.next=function(){                	
+                	$scope.step++;
+                	$scope.isreadyfornext=false;
+                	if($scope.step==2)
+                	{
+                		$scope.getFields();
+                	}
+                	if($scope.step==3)
+                	{
+                		$scope.isreadyfornext=true;
+                	}
+                	if($scope.step==4)
+                	{
+                		$scope.selectedfields=_.groupBy($scope.fields,'selected').true;                    
+                		$scope.calculate();
+                	}                	                
+                }
+
+                $scope.loadListInfo=function(){
+                	cfpLoadingBar.start();
+                	$scope.conn.metadata.list({type:'CustomField'}).then(function(results){
+                		$scope.allresults=results;
+                		$scope.groupinfo={};
+                		_.each(results,function(result){                			
+                				$scope.groupinfo[result.fullName]=result;
+                		});                		
+                		cfpLoadingBar.complete();
+                	});
+                }
+
+
+                $scope.getFields=function(){
+                	$scope.message='Getting field information for '+$scope.$selecteditem.label
+                	cfpLoadingBar.start();
+                	$scope.conn.describe($scope.$selecteditem.name).then(function(results){
+                        finalfields=[];
+                        $scope.firstset=results.fields;
+                        _.each(results.fields,function(field){
+                            if(!field.calculated && _.indexOf($scope.allowedtypes,field.type)!=-1 && !(field.type=='textarea' && field.length>10000))
+                            {                                
+                                if(field.name=='Id')
+                                    field.selected=true;
+                                else
+                                    field.selected=false;
+
+                                if($scope.groupinfo!=null && field.custom)
+                                {
+                                	key=$scope.$selecteditem.name+'.'+field.name;                                
+                                	if($scope.groupinfo.hasOwnProperty(key)){
+	                                	lstobject=$scope.groupinfo[key];                                	                                
+										field.lastModifiedDate=lstobject.lastModifiedDate;
+										field.lastModifiedByName=lstobject.lastModifiedByName;
+										field.createdDate=lstobject.createdDate;
+										field.createdByName=lstobject.createdByName;
+									}
+                                }
+
+                                finalfields.push(field);
+                            }                            
+                         });
+                        $scope.fields=finalfields;
+                        $scope.message='';
+                        cfpLoadingBar.complete();                        
+                    });
+                }
+
+                $scope.prev=function(){                	
+                	$scope.step--;
+                	if($scope.step==3)
+                	{
+                		$scope.isreadyfornext=true;
+                	}
+                }
+
+                $scope.addSplit=function(){                	
+                	$scope.splits.push({
+                		conditions:[{
+                			'field':'CreatedDate',
+                			'type':'=',
+                			'text':'LAST_90_DAYS'
+                		}]
+                	});
+                }
+				$scope.addCondition=function(split){
+					split.conditions.push({'field':'','type':'','text':''});
+				}
+
+				$scope.removeCondition=function(split,index){
+					split.conditions = _(split.conditions).filter(function(condition,indexloop) {
+     					return indexloop !== index;
+					});
+				}
+
+                $scope.selectObject=function(item,itemindex){                	
+                	angular.element(document.querySelectorAll('#objecttable tbody tr')).removeClass('alert alert-info');
+                	angular.element(document.querySelectorAll('#objecttable tbody tr')[itemindex]).addClass('alert alert-info');
+                	$scope.$selecteditem=item;
+                	$scope.isreadyfornext=true;                	
+                }
+
+                $scope.selectField=function(item,itemindex){
+	                if(item.name!='Id')
+	                {
+	                	item.selected=!item.selected;                	
+	                	if(_.groupBy($scope.fields,'selected').true.length>=2)
+	                		$scope.isreadyfornext=true;
+	                	else
+	                		$scope.isreadyfornext=false;
+	                }
+                }
+                               
+                
+                $scope.calculate = function(){
+                    cfpLoadingBar.start();
+                    fieldstobepushed=[];                    
+                    _.each($scope.selectedfields,function(field){fieldstobepushed.push('Count('+field.name+')');});
+                    console.log(fieldstobepushed);
+                    _.each($scope.splits,function(split,index){
+						split.query='select '+fieldstobepushed.join(',')+' from '+$scope.$selecteditem.name;
+						conditions=[];
+                    	_.each(split.conditions,function(condition){
+                			conditions.push(condition.field+' '+condition.type+' '+condition.text);
+                    	});
+                    	if(conditions.length>0)
+                    	{
+                    		split.query+=' WHERE '+conditions.join(' AND ');
+                    	}
+                    	split.selectedfields=[];
+                    	_.each($scope.selectedfields,function(field){
+                    		split.selectedfields.push({'label':field.label,'name':field.name});
+                    	});        	
+                    	//split.selectedfields=$scope.selectedfields;
+                    	split.results=$scope.conn.query(split.query);
+                    	split.results.then(function(results){
+	            			vals=_.values(results.records[0]);
+	        				_.each(split.selectedfields,function(selectedfield,fieldindex){        
+	                    		selectedfield.counter=vals[fieldindex+1];
+	                    		if(selectedfield.name=='Id')
+	                        		split.totalSize=selectedfield.counter;
+	              			});
+							cfpLoadingBar.complete();                        
+                    	});                    	
+                    });                                                            
+                }
+                   
+            }]);     
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

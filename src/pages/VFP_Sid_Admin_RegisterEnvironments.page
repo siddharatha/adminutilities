@@ -1,0 +1,68 @@
+<!--
+Author:Sid
+-->
+<apex:page docType="html-5.0" title="Sid's admin component selector" sidebar="false" showheader="false">
+    <apex:composition template="VFP_AngularBootstrapTemplate">
+        <apex:define name="scriptstoinclude">
+            <!-- once development is done move code to a .js file and load it from static resources -->   
+            <apex:includeScript value="{!URLFor($Resource.uigrid,'ui-grid-unstable.min.js')}" />
+        </apex:define>
+        <apex:define name="stylesheetstoinclude">
+            <!-- once development is done move code to a .css file and load it from static resources -->    
+            <apex:stylesheet value="{!URLFor($Resource.uigrid,'ui-grid-unstable.min.css')}" />        
+            <style>       
+            .table{
+            	cursor: pointer;                
+            }                       
+            </style>
+        </apex:define>        
+        <apex:define name="content">
+            <div ng-app="Admin" class="container" ng-controller="AdminController">            	
+            	<div>
+            				<a href="/apex/VFP_Sid_AdminUtilities">Back to Admin Utilities</a>
+	                        <button class="btn btn-warning" ng-disabled="step==1" ng-click="prev()">Prev</button>
+	            			<button ng-init="isreadyfornext=false" class="btn btn-primary" ng-disabled="step==4 || !isreadyfornext" ng-click="next()">Next</button>		            			          			
+	            			<span class="text-primary text-center" ng-show="message!=null && message!=''" ng-bind="message"></span>            	
+    			</div>
+            	<div class="panel" ng-switch="step" ng-init="step=1">            	
+            		<div ng-switch-when="1" class="panel panel-primary">
+	            		<div class="panel-heading">
+	                        <h3 class="panel-title" id="panel-title">Select an Environment<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>	                        
+	            			</h3>
+	                    </div>
+	                    <div class="panel-body">	                    	
+	            			<input type="text" size="40" class="form-control" ng-model="typeFilter" placeholder="Filter on types" />
+	            			<form class="form-horizontal">
+	            				<div class="form-group">
+	            					<label for="environment">Select</label>
+	            					<select id="environment" ng-options="item as item for item in ['Sandbox','Production']" ng-model="selectedtype" />	            					
+	            				</div>
+	            				<div class="form-group">
+	            					<input type="checkbox" class="form-control" ng-model="agree" id="agree" />
+	            					<label for="agree">I agree</label>
+	            				</div>	            				
+	            			</form>
+            			</div>
+            		</div>           	            		
+            	</div>            	
+            </div>
+        </apex:define>
+        <apex:define name="customscripts">
+            <!-- it is only meant for development, code should be inside static resources -->
+            <script>
+            var sidscope;
+            var app = angular.module('Admin', ['chieffancypants.loadingBar','ngAnimate','ngRoute','ngSanitize','ui.utils','ui.bootstrap','ui.grid','ui.grid.selection', 'ui.grid.exporter']);
+            app.config(function(cfpLoadingBarProvider) {
+                cfpLoadingBarProvider.includeSpinner = true;
+            });
+            app.controller('AdminController', ['$scope','cfpLoadingBar',function($scope,cfpLoadingBar) {        		       
+                 angular.element(document).ready(function () {                    
+                    sidscope=$scope;
+                    //your code here
+                    });                                     
+                 });
+            }]);     
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

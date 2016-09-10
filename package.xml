@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>VFP_AngularBootstrapTemplate</members>
+        <members>VFP_Sid_AdminUtilities</members>
+        <members>VFP_Sid_Admin_ComponentSelector</members>
+        <members>VFP_Sid_Admin_FieldAdoptionUtility</members>
+        <members>VFP_Sid_Admin_ListViewAnalyzer</members>
+        <members>VFP_Sid_Admin_RegisterEnvironments</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
+        <members>CCCClientLibraries</members>
+        <members>JSforce</members>
+        <name>StaticResource</name>
+    </types>
+    <version>36.0</version>
+</Package>

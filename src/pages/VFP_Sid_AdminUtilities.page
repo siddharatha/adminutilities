@@ -1,0 +1,82 @@
+<!--
+Author:Sid
+-->
+<apex:page docType="html-5.0" title="Sid's admin utilities" sidebar="false" showheader="false">
+    <apex:composition template="VFP_AngularBootstrapTemplate">
+        <apex:define name="scriptstoinclude">
+            <!-- once development is done move code to a .js file and load it from static resources -->            
+        </apex:define>
+        <apex:define name="stylesheetstoinclude">
+            <!-- once development is done move code to a .css file and load it from static resources -->
+            <style>                
+                h1{
+                color:red;
+                }
+            </style>
+        </apex:define>        
+        <apex:define name="content">
+            <div ng-app="BaseAdmin" class="container" ng-controller="BaseAdminController">
+                <div class="panel panel-primary">                 
+                    <div class="panel-heading">
+                        <h3 class="panel-title" id="panel-title">Admin Features<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>
+                    </div>
+                    <div class="panel-body">
+                        <accordion close-others="true">
+                            <accordion-group heading="Field Adoption Utility">                                
+                                <ol>
+                                    <li>Please read the instructions before accessing the link</li>
+                                    <li>If you want the created and last modified information of custom fields make sure to click on the "Load modification information" button after the page load and wait till the progress bar is completed.</li>
+                                    <li>Select the object , you have a quick search box to help you with that </li>
+                                    <li>Select the fields you would like to add to your check</li>
+                                    <li>Split defines a group of "AND" conditions which will help you with your query.</li>
+                                    <li>Add as many conditions as you like </li>
+                                    <li>Click on next , wait till the process bar is complete and you should have the results</li>
+                                    <li> The page can be accessed <a href="/apex/VFP_Sid_Admin_FieldAdoptionUtility">here</a></li>
+                                </ol>
+                            </accordion-group>
+                            <accordion-group heading="List View Analyzer">
+                                <ol>
+                                    <li>Please read the instructions before accessing the link</li>
+                                    <li>Select the object , click on next</li>
+                                    <li>Select the list view and the conditions are displayed on the page somewhere</li>
+                                    <li> The page can be accessed <a href="/apex/VFP_Sid_Admin_ListViewAnalyzer">here</a></li>
+                                </ol>
+                            </accordion-group>
+                            <accordion-group heading="Component Selector">
+                                <ol>
+                                    <li>Please read the instructions before accessing the link</li>
+                                    <li>Select single or multiple metadata types , click on next</li>
+                                    <li>enter the criteria seperated by commas and export the list into a csv/pdf</li>
+                                    <li> The page can be accessed <a href="/apex/VFP_Sid_Admin_ComponentSelector">here</a></li>
+                                </ol>
+                            </accordion-group>
+                            <accordion-group heading="Register Environments">
+                                <ol>
+                                    <li>Please read the instructions before accessing the link</li>
+                                    <li>very similar to workbench, select the type of environment sandbox/prod</li>
+                                    <li>enter your salesforce credentials, authorize SE developers.</li>
+                                    <li> The page can be accessed <a href="/apex/VFP_Sid_Admin_RegisterEnvironments">here</a></li>
+                                </ol>
+                            </accordion-group>
+                        </accordion>                                                
+                    </div>    
+                </div>
+            </div>
+        </apex:define>
+        <apex:define name="customscripts">
+            <!-- it is only meant for development, code should be inside static resources -->
+            <script>
+            var debugscope;
+            var app = angular.module('BaseAdmin', ['chieffancypants.loadingBar','ngAnimate','ngRoute','ngSanitize','ui.utils','ui.bootstrap']);
+            app.config(function(cfpLoadingBarProvider) {
+                cfpLoadingBarProvider.includeSpinner = true;
+            });
+            app.controller('BaseAdminController', ['$scope','cfpLoadingBar',function($scope,cfpLoadingBar) {                
+                angular.element(document).ready(function () {                
+                    debugscope=$scope;                   
+                });                                                              
+            }]);     
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

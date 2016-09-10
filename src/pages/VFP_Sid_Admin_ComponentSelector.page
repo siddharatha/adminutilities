@@ -1,0 +1,203 @@
+<!--
+Author:Sid
+-->
+<apex:page docType="html-5.0" title="Sid's admin component selector" sidebar="false" showheader="false">
+    <apex:composition template="VFP_AngularBootstrapTemplate">
+        <apex:define name="scriptstoinclude">
+            <!-- once development is done move code to a .js file and load it from static resources -->   
+            <apex:includeScript value="{!URLFor($Resource.uigrid,'ui-grid-unstable.min.js')}" />
+        </apex:define>
+        <apex:define name="stylesheetstoinclude">
+            <!-- once development is done move code to a .css file and load it from static resources -->    
+            <apex:stylesheet value="{!URLFor($Resource.uigrid,'ui-grid-unstable.min.css')}" />        
+            <style>       
+            .table{
+            	cursor: pointer;
+                height:100%;
+            }         
+              .header-filtered {
+  					color: blue;
+				}  
+            </style>
+        </apex:define>        
+        <apex:define name="content">
+            <div ng-app="Admin" class="container" ng-controller="AdminController">            	
+            	<div>
+            				<a href="/apex/VFP_Sid_AdminUtilities">Back to Admin Utilities</a>
+	                        <button class="btn btn-warning" ng-disabled="step==1" ng-click="prev()">Prev</button>
+	            			<button ng-init="isreadyfornext=false" class="btn btn-primary" ng-disabled="step==4 || !isreadyfornext" ng-click="next()">Next</button>		            			          			
+	            			<span class="text-primary text-center" ng-show="message!=null && message!=''" ng-bind="message"></span>            	
+    			</div>
+            	<div class="panel" ng-switch="step" ng-init="step=1">            	
+            		<div ng-switch-when="1" class="panel panel-primary">
+	            		<div class="panel-heading">
+	                        <h3 class="panel-title" id="panel-title">Select Metadata Type<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>	                        
+	            			</h3>
+	                    </div>
+	                    <div class="panel-body">	                    	
+	            			<input type="text" size="40" class="form-control" ng-model="typeFilter" placeholder="Filter on types" />
+	            			<table id="typetable" class="table table-condensed">
+	            				<thead>
+	            				<tr>
+	            					<th>type xml name</th>	            					
+	            					<th>type directory name</th>
+	            				</tr>
+	            				</thead>
+	            				<tbody>
+	            				<tr ng-repeat="type in metadatatypes | filter:typeFilter | orderBy:'xmlName'" ng-click="selectType(type,$index)" ng-class="{'alert-info':type.selected}">
+	            					<td ng-bind="type.xmlName"></td>
+	            					<td ng-bind="type.directoryName"></td>	            					
+	            				</tr>
+	            				</tbody>
+	            			</table>	            			
+            			</div>
+            		</div>
+            		<div ng-switch-when="2" class="panel panel-primary">            			
+	            		<div class="panel-heading">
+	                        <h3 class="panel-title" id="panel-title">Select The components<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a>	                        
+	            			</h3>
+	                    </div>
+	                    <div class="panel-body">	                    	                    
+	            			<div ui-grid="gridOptions" ui-grid-selection="true" ui-grid-exporter="true" class="table"></div>				
+            			</div>
+            		</div>             	            		
+            	</div>            	
+            </div>
+        </apex:define>
+        <apex:define name="customscripts">
+            <!-- it is only meant for development, code should be inside static resources -->
+            <script>
+            var sidscope;
+            var app = angular.module('Admin', ['chieffancypants.loadingBar','ngAnimate','ngRoute','ngSanitize','ui.utils','ui.bootstrap','ui.grid','ui.grid.selection', 'ui.grid.exporter']);
+            app.config(function(cfpLoadingBarProvider) {
+                cfpLoadingBarProvider.includeSpinner = true;
+            });
+            app.controller('AdminController', ['$scope','cfpLoadingBar',function($scope,cfpLoadingBar) {
+        		$scope.gridOptions = {
+    					enableFiltering: true,    					    					
+    					enableGridMenu: true,
+					    enableSelectAll: true,
+					    exporterCsvFilename: 'metadataFileExport.csv',    					
+					    exporterCsvLinkElement: angular.element(document.querySelectorAll(".custom-csv-link-location")),
+					    columnDefs: [{field:'fullName',headerCellClass: $scope.highlightFilteredHeader},
+					    {field:'type',headerCellClass: $scope.highlightFilteredHeader},
+					    {field:'createdByName',headerCellClass: $scope.highlightFilteredHeader},
+					    {field:'createdDate',headerCellClass: $scope.highlightFilteredHeader},
+					    {field:'lastModifiedByName',headerCellClass: $scope.highlightFilteredHeader},
+					    {field:'lastModifiedDate',headerCellClass: $scope.highlightFilteredHeader},
+					    {field:'namespacePrefix',headerCellClass: $scope.highlightFilteredHeader}],
+    					onRegisterApi: function(gridApi){ 
+    						$scope.gridApi = gridApi;
+    					}
+				}                
+                 angular.element(document).ready(function () {
+                    //establishing a connection
+                    sidscope=$scope;
+                    $scope.conn = new jsforce.Connection({ accessToken: '{!$Api.Session_Id}' });
+                    cfpLoadingBar.start();
+                    $scope.message='Getting type information';
+                    $scope.conn.metadata.describe().then(function(res){                    	
+                        $scope.metadatatypes=[];
+                        _.each(res.metadataObjects,function(item){                        	
+                        	$scope.metadatatypes.push({'xmlName':item.xmlName,'directoryName':item.directoryName,'selected':false})
+                        	if(_.has(item,'childXmlNames') && _.isArray(item.childXmlNames))
+                        	{
+                        		_.each(item.childXmlNames,function(item2){
+                        			$scope.metadatatypes.push({'xmlName':item2,'directoryName':item.directoryName,'selected':false});
+                        		});
+                        	}
+                        });
+                        $scope.message='';
+                        cfpLoadingBar.complete();
+                        $scope.filenametobeused='metadataexport';
+                    });                                     
+                 });
+
+					$scope.highlightFilteredHeader = function( row, rowRenderIndex, col, colRenderIndex ) {
+                    	if( col.filters[0].term ){
+                    		return 'header-filtered';
+                    	} else {
+                    		return '';
+                    	}
+                    };
+
+                $scope.next=function(){                	
+                	$scope.step++;
+                	$scope.isreadyfornext=false;
+                	if($scope.step==2)
+                	{
+                		$scope.getDetails();
+                	}
+                	if($scope.step==3)
+                	{
+                		$scope.isreadyfornext=true;
+                	}
+                	if($scope.step==4)
+                	{
+                		$scope.selectedfields=_.groupBy($scope.fields,'selected').true;                    
+                		$scope.calculate();
+                	}                	                
+                }
+
+                $scope.filterByCommas = function(item) {
+                	if(!$scope.hasOwnProperty('resultFilter'))return item;
+                	else{
+	                	var re=new RegExp($scope.resultFilter.split(',').join('|').toLowerCase());
+	                	if(re.test(JSON.stringify(item).toLowerCase()))return item;
+	                }
+			    };
+
+                $scope.getDetails=function(){
+                	typestobeused=_.pluck(_.groupBy($scope.metadatatypes,'selected').true,'xmlName');
+                	$scope.message='Getting field information for '+typestobeused.join(',');                	
+                	typeslist=[];
+                	_.each(typestobeused,function(item){
+                		typeslist.push({'type':item});
+                	});
+                	for(var i=0;i<typeslist.length;i=i+3)
+			        {            
+			            var newlist=typeslist.slice(i,i+3);
+			            setTimeout(processData(newlist),100);
+			        }                	
+                }
+                function processData(newlist){
+                	cfpLoadingBar.start();
+                	$scope.conn.metadata.list(newlist).then(function(results){
+                		$scope.gridOptions.data=_.union($scope.gridOptions.data,results);
+                		if(_.isNull($scope.csvheader) || _.isEmpty($scope.csvheader))
+                			$scope.csvheader=_.keys(results[0]);
+                		cfpLoadingBar.complete();
+                	});
+                }
+
+                $scope.prev=function(){                	
+                	$scope.step--;
+                	if($scope.step==3)
+                	{
+                		$scope.isreadyfornext=true;
+                	}
+                }
+                
+                $scope.selectType=function(item,itemindex){
+	                	item.selected=!item.selected;                	
+	                	if(_.groupBy($scope.metadatatypes,'selected').hasOwnProperty('true'))
+	                		$scope.isreadyfornext=true;
+	                	else
+	                		$scope.isreadyfornext=false;	                
+                }
+
+                $scope.selectFilter=function(item,itemindex){
+                	if(!item.hasOwnProperty('selected'))
+                		item.selected=false;
+	                	item.selected=!item.selected;                	
+	                	if(_.groupBy($scope.metadatatypes,'selected').hasOwnProperty('true'))
+	                		$scope.isreadyfornext=true;
+	                	else
+	                		$scope.isreadyfornext=false;	                
+                }                                                          
+                   
+            }]);     
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>
