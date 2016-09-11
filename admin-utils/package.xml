@@ -15,6 +15,7 @@
     </types>
     <types>
         <members>SID_UIUtils</members>        
+        <members>SID_UIGrid</members>        
         <name>StaticResource</name>
     </types>
     <version>36.0</version>
