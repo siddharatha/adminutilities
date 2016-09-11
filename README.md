@@ -3,3 +3,11 @@
 
 Collection of admin utilities for component selection, list view analysis and field adoption
 
+# License
+MIT License
+
+# Document
+pending
+
+#screenshots
+pending

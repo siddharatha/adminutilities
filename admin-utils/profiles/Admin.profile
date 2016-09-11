@@ -2,7 +2,7 @@
 <Profile xmlns="http://soap.sforce.com/2006/04/metadata">
     <custom>false</custom>
     <pageAccesses>
-        <apexPage>VFP_AngularBootstrapTemplate</apexPage>
+        <apexPage>VFP_Sid_AngularBootstrapTemplate</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
     <pageAccesses>

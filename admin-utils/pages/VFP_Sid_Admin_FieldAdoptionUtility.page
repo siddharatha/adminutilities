@@ -2,7 +2,7 @@
 Author:Sid
 -->
 <apex:page docType="html-5.0" title="Sid's admin utilities wizard" sidebar="false" showheader="false">
-    <apex:composition template="VFP_AngularBootstrapTemplate">
+    <apex:composition template="VFP_Sid_AngularBootstrapTemplate">
         <apex:define name="scriptstoinclude">
             <!-- once development is done move code to a .js file and load it from static resources -->              
         </apex:define>

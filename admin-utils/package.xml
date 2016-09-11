@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>VFP_AngularBootstrapTemplate</members>
+        <members>VFP_Sid_AngularBootstrapTemplate</members>
         <members>VFP_Sid_AdminUtilities</members>
         <members>VFP_Sid_Admin_ComponentSelector</members>
         <members>VFP_Sid_Admin_FieldAdoptionUtility</members>
@@ -14,8 +14,7 @@
         <name>Profile</name>
     </types>
     <types>
-        <members>CCCClientLibraries</members>
-        <members>JSforce</members>
+        <members>Sid_UIUtils</members>        
         <name>StaticResource</name>
     </types>
     <version>36.0</version>
