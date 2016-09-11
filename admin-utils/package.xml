@@ -14,7 +14,7 @@
         <name>Profile</name>
     </types>
     <types>
-        <members>Sid_UIUtils</members>        
+        <members>SID_UIUtils</members>        
         <name>StaticResource</name>
     </types>
     <version>36.0</version>
