@@ -5,11 +5,11 @@ Author:Sid
     <apex:composition template="VFP_Sid_AngularBootstrapTemplate">
         <apex:define name="scriptstoinclude">
             <!-- once development is done move code to a .js file and load it from static resources -->   
-            <apex:includeScript value="{!URLFor($Resource.uigrid,'ui-grid-unstable.min.js')}" />
+            <apex:includeScript value="{!URLFor($Resource.SID_UIGrid,'ui-grid-unstable.min.js')}" />
         </apex:define>
         <apex:define name="stylesheetstoinclude">
             <!-- once development is done move code to a .css file and load it from static resources -->    
-            <apex:stylesheet value="{!URLFor($Resource.uigrid,'ui-grid-unstable.min.css')}" />        
+            <apex:stylesheet value="{!URLFor($Resource.SID_UIGrid,'ui-grid-unstable.min.css')}" />        
             <style>       
             .table{
             	cursor: pointer;
